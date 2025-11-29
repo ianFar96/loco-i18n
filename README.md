@@ -10,6 +10,7 @@
 - **Remote key fetching**: Automatically fetches translation keys from your Loco server.  
 - **Customizable settings**: Configure the translation function name, target languages, and Loco API connection.  
 
+<!-- TODO: find a way to host the image -->
 ![feature-example](images/screenshot.png)  
 *Example of missing key diagnostics in the editor.*
 
