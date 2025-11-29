@@ -1,0 +1,84 @@
+{
+  "name": "loco-i18n",
+  "displayName": "Loco i18n",
+  "description": "Loco i18n integration for vscode",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.106.1"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "Loco i18n Settings",
+      "properties": {
+        "locoI18n.tFunctionName": {
+          "type": "string",
+          "default": "t",
+          "description": "The name of the translation function to scan for"
+        },
+        "locoI18n.targetLanguages": {
+          "type": "array",
+          "default": [
+            "javascript",
+            "typescript",
+            "javascriptreact",
+            "typescriptreact",
+            "svelte",
+            "vue"
+          ],
+          "description": "Languages where the extension should parse t() keys"
+        },
+        "locoI18n.remoteUrl": {
+          "type": "string",
+          "default": "https://localise.biz/",
+          "description": "URL for the Loco's APIs"
+        },
+        "locoI18n.apiKey": {
+          "type": "string",
+          "description": "API key from Loco to fetch and insert translations. Make sure the key is a Full access key and not a Read-only key if you plan on using the insert functionality"
+        },
+        "locoI18n.lang": {
+          "type": "string",
+          "default": "en",
+          "description": "Language to use from loco"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "loco-i18n.refreshLocalKeys",
+        "title": "Refresh local keys from Loco"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn run compile && yarn run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/babel__traverse": "^7",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.19.1",
+    "@types/vscode": "^1.106.1",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3"
+  },
+  "packageManager": "yarn@4.9.3",
+  "dependencies": {
+    "@babel/parser": "^7.28.5",
+    "@babel/traverse": "^7.28.5"
+  }
+}
