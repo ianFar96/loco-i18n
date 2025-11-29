@@ -52,8 +52,16 @@
     },
     "commands": [
       {
+        "command": "loco-i18n.createKey",
+        "title": "Create Translation Key",
+        "category": "Loco i18n",
+        "tooltip": "Create a new translation key in Loco"
+      },
+      {
         "command": "loco-i18n.refreshLocalKeys",
-        "title": "Loco-i18n: Refresh local keys from Loco"
+        "title": "Refresh Local Keys",
+        "category": "Loco i18n",
+        "tooltip": "Fetch latest translation keys from Loco"
       }
     ]
   },

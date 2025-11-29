@@ -55,4 +55,30 @@ export default class LocoManager {
             vscode.window.showErrorMessage('Unexpected error: could not fetch assets from Loco API');
         }
     }
+
+    async createKey(key: string) {
+        try {
+            const response = await fetch(join(this.config.url, 'api/assets'), {
+                method: 'POST',
+                headers: {
+                    Authorization: `Loco ${this.config.apiKey}`,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    id: key,
+                    default: 'untranslated',
+                })
+            });
+
+            if (!response.ok) {
+                const {error: errorMsg} = await response.json() as { status: number, error: string };
+                throw new Error(`HTTP ${response.status}: ${errorMsg}`);
+            }
+
+            if (this.keys) { this.keys.push(key); }
+        } catch (err) {
+            console.error('Failed to create key:', err);
+            throw err;
+        }
+    }
 }

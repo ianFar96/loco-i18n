@@ -30,6 +30,40 @@ export default class EditorManager {
         };
 
         this.diagnostics = vscode.languages.createDiagnosticCollection('loco-i18n');
+
+        vscode.languages.registerCodeActionsProvider(
+            this.config.targetLanguages,
+            {
+                provideCodeActions: (document, range, context, token) => {
+                    const actions: vscode.CodeAction[] = [];
+
+                    for (const diagnostic of context.diagnostics) {
+                        if (diagnostic.source === 'loco-i18n' && diagnostic.message.startsWith('Missing translation key')) {
+                            const match = diagnostic.message.match(/"(.+?)"/);
+                            if (match) {
+                                const key = match[1];
+                                const action = new vscode.CodeAction(
+                                    `Create new translation key: "${key}"`,
+                                    vscode.CodeActionKind.QuickFix
+                                );
+
+                                action.command = {
+                                    title: 'Create translation key',
+                                    command: 'loco-i18n.createKey',
+                                    arguments: [key]
+                                };
+
+                                action.diagnostics = [diagnostic];
+                                actions.push(action);
+                            }
+                        }
+                    }
+
+                    return actions;
+                }
+            },
+            { providedCodeActionKinds: [vscode.CodeActionKind.QuickFix] }
+        );
     }
     
     async scanDocument(editor: vscode.TextEditor) {
@@ -86,7 +120,10 @@ export default class EditorManager {
                             vscode.DiagnosticSeverity.Warning
                         );
     
-                        diagnostics.push(diagnostic);
+                        diagnostics.push({
+                            ...diagnostic,
+                            source: 'loco-i18n'
+                        });
                     }
                 }
             }

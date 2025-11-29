@@ -31,10 +31,37 @@ export function activate(context: vscode.ExtensionContext) {
 		if (editor) { editorManager.scanDocument(editor); }
 	});
 
+	const createKeyDisposable = vscode.commands.registerCommand(
+		'loco-i18n.createKey',
+		async (key?: string) => {
+			 // Prompt the user, pre-filling with the key if available
+			const inputKey = await vscode.window.showInputBox({
+				prompt: 'Enter the translation key to create',
+				value: key || ''
+			});
+
+			if (!inputKey) {
+				vscode.window.showWarningMessage('No translation key provided.');
+				return;
+			}
+			
+			try {
+				await locoManager.createKey(inputKey);
+				vscode.window.showInformationMessage(`Created translation key: "${inputKey}"`);
+				
+				const editor = vscode.window.activeTextEditor;
+				if (editor) { editorManager.scanDocument(editor); }
+			} catch (err) {
+				vscode.window.showErrorMessage(`Failed to create translation key: ${err}`);
+			}
+		}
+	);
+
 	context.subscriptions.push(...[
 		editorChangeDisposable,
 		editorSaveDisposable,
 		refreshLocalKeysDisposable,
+		createKeyDisposable
 	]);
 }
 
