@@ -1,71 +1,64 @@
-# loco-i18n README
+# loco-i18n
 
-This is the README for your extension "loco-i18n". After writing up a brief description, we recommend including the following sections.
+`loco-i18n` is a Visual Studio Code extension that helps you manage internationalization (i18n) keys in your JavaScript, TypeScript, React, Svelte, and Vue projects. It automatically scans your code for translation function calls (e.g., `t('key')`), highlights missing keys, and integrates with a Loco translation server to fetch available keys.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Automatic key scanning**: Detects all calls to your translation function (`t('<key>')`) in supported files.  
+- **Missing key diagnostics**: Shows warnings for translation keys that are not present in your Loco assets.  
+- **Live updates**: Re-scans the file when you save, switch tabs, or refresh keys.  
+- **Remote key fetching**: Automatically fetches translation keys from your Loco server.  
+- **Customizable settings**: Configure the translation function name, target languages, and Loco API connection.  
 
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+![feature-example](images/screenshot.png)  
+*Example of missing key diagnostics in the editor.*
 
 ---
 
-## Following extension guidelines
+## Getting Started
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+1. **Install the extension** from the VS Code marketplace or your VSIX file.  
+2. **Configure your settings** in VS Code `settings.json`.  
+3. **Open a supported file** (JS, TS, JSX, TSX, Svelte, Vue).  
+4. Missing translation keys will be highlighted with a warning in the editor.  
+5. Use the **command palette** (`Ctrl+Shift+P` / `Cmd+Shift+P`) and run `Loco-i18n: Refresh Local Keys` to fetch the latest keys from your Loco server and update diagnostics.
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+---
 
-## Working with Markdown
+## Extension Settings
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+This extension contributes the following settings:
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+* `locoI18n.tFunctionName` — The name of the translation function to scan for. Default: `"t"`.  
+* `locoI18n.targetLanguages` — Languages where the extension should parse translation keys. Default: `["javascript","typescript","javascriptreact","typescriptreact","svelte","vue"]`.  
+* `locoI18n.remoteUrl` — The base URL of your Loco API server.  
+* `locoI18n.apiKey` — API key for accessing your Loco server.  
+* `locoI18n.lang` — The language to fetch from Loco.
 
-## For more information
+---
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+## Commands
 
-**Enjoy!**
+- `Loco-i18n: Refresh Local Keys` — Fetches the latest keys from your Loco server and re-scans the active file.
+
+---
+
+## Known Issues
+
+- Only string literal keys are currently detected (e.g., `t('home.title')`). Dynamic keys (e.g., `t(variable)`) are not analyzed.  
+- Large files may trigger a delay in scanning; future versions may add debouncing for performance.  
+
+---
+
+## Upcoming Features
+
+- Add new translations to Loco directly from VS Code through extension commands.  
+- Show translation values for existing keys as tooltips when hovering over `t('<key>')`.
+
+---
+
+## Release Notes
+
+### 1.0.0
+
+- Initial release with AST-based key scanning, missing key diagnostics, and Loco integration.

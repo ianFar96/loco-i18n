@@ -2,7 +2,7 @@
   "name": "loco-i18n",
   "displayName": "Loco i18n",
   "description": "Loco i18n integration for vscode",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.106.1"
   },
@@ -53,7 +53,7 @@
     "commands": [
       {
         "command": "loco-i18n.refreshLocalKeys",
-        "title": "Refresh local keys from Loco"
+        "title": "Loco-i18n: Refresh local keys from Loco"
       }
     ]
   },
