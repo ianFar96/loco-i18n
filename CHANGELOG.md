@@ -9,3 +9,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### 1.0.0
 
 - Initial release with AST-based key scanning, missing key diagnostics, and Loco integration.
+
+### 1.1.0
+
+## Added
+
+- Quick Fix option on missing keys
+- Create key command which creates the untranslated asset in Loco

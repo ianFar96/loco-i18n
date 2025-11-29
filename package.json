@@ -2,7 +2,7 @@
   "name": "loco-i18n",
   "displayName": "Loco i18n",
   "description": "Loco i18n integration for vscode",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "engines": {
     "vscode": "^1.106.1"
   },
