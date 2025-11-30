@@ -3,6 +3,11 @@
   "displayName": "Loco i18n",
   "description": "Loco i18n integration for vscode",
   "version": "1.2.0",
+  "publisher": "ianfa",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ianFar96/loco-i18n.git"
+  },
   "icon": "images/icon.png",
   "engines": {
     "vscode": "^1.106.1"
@@ -13,7 +18,7 @@
   "activationEvents": [
     "onStartupFinished"
   ],
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "contributes": {
     "configuration": {
       "title": "Loco i18n Settings",
@@ -67,9 +72,13 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "yarn run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "compile": "npm run check-types && node esbuild.js",
+    "check-types": "tsc --noEmit",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "vscode:prepublish": "npm run package",
+    "package": "npm run check-types && node esbuild.js --production",
     "lint": "eslint src"
   },
   "devDependencies": {
@@ -77,6 +86,7 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.19.1",
     "@types/vscode": "^1.106.1",
+    "esbuild": "^0.27.0",
     "eslint": "^9.39.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3"
