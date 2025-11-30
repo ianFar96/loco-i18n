@@ -49,7 +49,7 @@ export default class EditorManager {
 
                                 action.command = {
                                     title: 'Create translation key',
-                                    command: 'loco-i18n.createKey',
+                                    command: 'loco-i18n.createTranslation',
                                     arguments: [key]
                                 };
 
@@ -64,6 +64,28 @@ export default class EditorManager {
             },
             { providedCodeActionKinds: [vscode.CodeActionKind.QuickFix] }
         );
+
+        vscode.languages.registerHoverProvider(
+            this.config.targetLanguages,
+            {
+                async provideHover(document, position) {
+                    const range = document.getWordRangeAtPosition(position, /['"`]([^'"`]+)['"`]/);
+                    if (!range) {return;}
+
+                    const raw = document.getText(range);
+                    const key = raw.slice(1, -1); // remove quotes
+
+                    // Example: Look up the translation value from your cached keys
+                    const locoTranslations = await locoManager.getTranslations();
+                    const value = locoTranslations?.[key];
+
+                    if (!value) {return;}
+
+                    return new vscode.Hover(
+                        new vscode.MarkdownString(`**${key}**\n\n${value}`)
+                    );
+                }
+            });
     }
     
     async scanDocument(editor: vscode.TextEditor) {
@@ -101,13 +123,13 @@ export default class EditorManager {
                 }
             });
 
-            const locoKeys = await this.locoManager.getKeys();
+            const locoTranslations = await this.locoManager.getTranslations();
             const diagnostics: vscode.Diagnostic[] = [];
             
             // When error getting loco keys just empty the diagnostics
-            if (locoKeys !== null) {
+            if (locoTranslations !== null) {
                 for (const node of keys) {
-                    if (!locoKeys?.includes(node.value)) {
+                    if (!(node.value in locoTranslations)) {
                         const start = editor.document.positionAt(node.start!);
                         const end = editor.document.positionAt(node.end!);
     

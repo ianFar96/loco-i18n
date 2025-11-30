@@ -52,16 +52,16 @@
     },
     "commands": [
       {
-        "command": "loco-i18n.createKey",
-        "title": "Create Translation Key",
+        "command": "loco-i18n.createTranslation",
+        "title": "Create Translation",
         "category": "Loco i18n",
-        "tooltip": "Create a new translation key in Loco"
+        "tooltip": "Create a new translation in Loco"
       },
       {
-        "command": "loco-i18n.refreshLocalKeys",
-        "title": "Refresh Local Keys",
+        "command": "loco-i18n.refreshLocalTranslations",
+        "title": "Refresh Local Translations",
         "category": "Loco i18n",
-        "tooltip": "Fetch latest translation keys from Loco"
+        "tooltip": "Fetch latest assets and translations from Loco"
       }
     ]
   },

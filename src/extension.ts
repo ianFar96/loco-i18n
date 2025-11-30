@@ -25,16 +25,15 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	const refreshLocalKeysDisposable = vscode.commands.registerCommand('loco-i18n.refreshLocalKeys', async () => {
-		await locoManager.refreshKeys();
+	const refreshLocalTranslationsDisposable = vscode.commands.registerCommand('loco-i18n.refreshLocalTranslations', async () => {
+		await locoManager.refreshTranslations();
 		const editor = vscode.window.activeTextEditor;
 		if (editor) { editorManager.scanDocument(editor); }
 	});
 
-	const createKeyDisposable = vscode.commands.registerCommand(
-		'loco-i18n.createKey',
+	const createTranslationDisposable = vscode.commands.registerCommand(
+		'loco-i18n.createTranslation',
 		async (key?: string) => {
-			 // Prompt the user, pre-filling with the key if available
 			const inputKey = await vscode.window.showInputBox({
 				prompt: 'Enter the translation key to create',
 				value: key || ''
@@ -44,15 +43,25 @@ export function activate(context: vscode.ExtensionContext) {
 				vscode.window.showWarningMessage('No translation key provided.');
 				return;
 			}
+
+			const inputTranslation = await vscode.window.showInputBox({
+				prompt: 'Enter the translation text to create',
+				value: ''
+			});
+
+			if (!inputTranslation) {
+				vscode.window.showWarningMessage('No translation text provided.');
+				return;
+			}
 			
 			try {
-				await locoManager.createKey(inputKey);
-				vscode.window.showInformationMessage(`Created translation key: "${inputKey}"`);
+				await locoManager.createTranslation(inputKey, inputTranslation);
+				vscode.window.showInformationMessage(`Created translation: "${inputKey}"`);
 				
 				const editor = vscode.window.activeTextEditor;
 				if (editor) { editorManager.scanDocument(editor); }
 			} catch (err) {
-				vscode.window.showErrorMessage(`Failed to create translation key: ${err}`);
+				vscode.window.showErrorMessage(`Failed to create translation: ${err}`);
 			}
 		}
 	);
@@ -60,8 +69,8 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(...[
 		editorChangeDisposable,
 		editorSaveDisposable,
-		refreshLocalKeysDisposable,
-		createKeyDisposable
+		refreshLocalTranslationsDisposable,
+		createTranslationDisposable
 	]);
 }
 

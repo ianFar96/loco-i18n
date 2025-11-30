@@ -9,7 +9,7 @@ type LocoCofig = {
 
 export default class LocoManager {
     private config: LocoCofig;
-    private keys: string[] | null = null;
+    private translations: Record<string, string> | null = null;
     
     constructor(config: vscode.WorkspaceConfiguration) {
         const url = config.get<string>('remoteUrl');
@@ -28,37 +28,36 @@ export default class LocoManager {
         };
     }
 
-    async getKeys() {
-        if (this.keys === null) {
-            await this.refreshKeys();
+    async getTranslations() {
+        if (this.translations === null) {
+            await this.refreshTranslations();
         }
 
-        return this.keys;
+        return this.translations;
     }
 
-    async refreshKeys() {
-        console.debug("Refreshing Loco keys...");
+    async refreshTranslations() {
+        console.debug("Refreshing Loco translations...");
 
         try {
-            const response = await fetch(join(this.config.url, "api/assets"), {
+            const response = await fetch(join(this.config.url, `api/export/locale/${this.config.lang}.json?no-expand`), {
                 headers: {
                     Authorization: `Loco ${this.config.apiKey}`
                 }
             });
-    
-            const assets = await response.json() as { id: string }[];
-            this.keys = assets.map(({id}) => id);
 
-            console.debug("Keys refreshed");
+            this.translations = await response.json() as Record<string, string>;
+
+            console.debug("Translations refreshed");
         } catch (error) {
-            console.error('Unexpected error: could not fetch assets from Loco API', error);
-            vscode.window.showErrorMessage('Unexpected error: could not fetch assets from Loco API');
+            console.error('Unexpected error: could not fetch translations from Loco API', error);
+            vscode.window.showErrorMessage('Unexpected error: could not fetch translations from Loco API');
         }
     }
 
-    async createKey(key: string) {
+    async createTranslation(key: string, translation: string) {
         try {
-            const response = await fetch(join(this.config.url, 'api/assets'), {
+            const assetResponse = await fetch(join(this.config.url, 'api/assets'), {
                 method: 'POST',
                 headers: {
                     Authorization: `Loco ${this.config.apiKey}`,
@@ -70,14 +69,30 @@ export default class LocoManager {
                 })
             });
 
-            if (!response.ok) {
-                const {error: errorMsg} = await response.json() as { status: number, error: string };
-                throw new Error(`HTTP ${response.status}: ${errorMsg}`);
+            if (!assetResponse.ok) {
+                const {error: errorMsg} = await assetResponse.json() as { status: number, error: string };
+                throw new Error(`HTTP ${assetResponse.status}: ${errorMsg}`);
             }
 
-            if (this.keys) { this.keys.push(key); }
+            const translateResponse = await fetch(join(this.config.url, `api/translations/${key}/${this.config.lang}`), {
+                method: 'POST',
+                headers: {
+                    Authorization: `Loco ${this.config.apiKey}`,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: translation
+            });
+
+            if (!translateResponse.ok) {
+                const {error: errorMsg} = await translateResponse.json() as { status: number, error: string };
+                throw new Error(`HTTP ${translateResponse.status}: ${errorMsg}`);
+            }
+
+            if (this.translations) {
+                this.translations[key] = translation;
+            }
         } catch (err) {
-            console.error('Failed to create key:', err);
+            console.error('Failed to create translation:', err);
             throw err;
         }
     }
