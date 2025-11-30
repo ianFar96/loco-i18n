@@ -4,6 +4,10 @@ import traverse from '@babel/traverse';
 import * as t from '@babel/types';
 import LocoManager from './loco';
 
+function escapeRegex(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape special chars
+}
+
 type EditorConfig = {
     tFunctionName: string
     targetLanguages: string[]
@@ -74,7 +78,7 @@ export default class EditorManager {
                         const text = document.getText(range);
                         const hints: vscode.InlayHint[] = [];
     
-                        const regex = /t\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
+                        const regex = new RegExp(`${escapeRegex(tFunctionName)}\\s*\\(\\s*['"\`](.+?)['"\`]\\s*\\)`, 'g');
                         let match;
     
                         // Offset where the given range starts inside the full document
