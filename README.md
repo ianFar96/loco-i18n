@@ -1,6 +1,8 @@
 # loco-i18n
 
-`loco-i18n` is a Visual Studio Code extension that helps you manage internationalization (i18n) translations in your JavaScript, TypeScript, React, Svelte, and Vue projects. It automatically scans your code for translation function calls (e.g., `t('key')`), highlights missing translations, and integrates with a Loco translation server to fetch available translations.
+`loco-i18n` is a Visual Studio Code extension that helps you manage internationalization (i18n) translations in your JavaScript, TypeScript, React, Svelte, and Vue projects. It automatically scans your code for translation function calls (e.g., `t('key')`), highlights missing translations, and integrates with a Loco translation server to fetch available translations and insert missing ones.
+
+![feature X](images/demo.gif)
 
 ## Features
 
@@ -61,8 +63,8 @@ This extension contributes the following settings:
 
 ### 1.1.0
 
-- Added Quick Fix option on missing translations  
-- Added Create Translation command which creates the untranslated asset in Loco
+- Added Quick Fix option on missing keys  
+- Added Create Key command which creates the untranslated asset in Loco
 
 ### 1.2.0
 
