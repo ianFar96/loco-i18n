@@ -65,7 +65,50 @@ export default class EditorManager {
             { providedCodeActionKinds: [vscode.CodeActionKind.QuickFix] }
         );
 
-        vscode.languages.registerHoverProvider(
+        const inlaysEnabled = vscode.workspace.getConfiguration('editor.inlayHints').get('enabled') === 'on';
+        if (inlaysEnabled) {
+            vscode.languages.registerInlayHintsProvider(
+                this.config.targetLanguages,
+                {
+                    async provideInlayHints(document, range) {
+                        const text = document.getText(range);
+                        const hints: vscode.InlayHint[] = [];
+    
+                        const regex = /t\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
+                        let match;
+    
+                        // Offset where the given range starts inside the full document
+                        const rangeStartOffset = document.offsetAt(range.start);
+    
+                        const locoTranslations = await locoManager.getTranslations();
+    
+                        while ((match = regex.exec(text)) !== null) {
+                            const key = match[1];
+    
+                            const endOfMatchInRange = match.index + match[0].length;
+                            const absoluteOffset = rangeStartOffset + endOfMatchInRange;
+                            const position = document.positionAt(absoluteOffset);
+    
+                            const translation = locoTranslations?.[key];
+                            if (!translation) {continue;}
+    
+                            const hint = new vscode.InlayHint(
+                                position,
+                                ` ${translation}`,  // leading space for readability
+                                vscode.InlayHintKind.Type
+                            );
+    
+                            hint.tooltip = translation;
+    
+                            hints.push(hint);
+                        }
+    
+                        return hints;
+                    }
+                }
+            );
+        } else {
+            vscode.languages.registerHoverProvider(
             this.config.targetLanguages,
             {
                 async provideHover(document, position) {
@@ -86,6 +129,7 @@ export default class EditorManager {
                     );
                 }
             });
+        }
     }
     
     async scanDocument(editor: vscode.TextEditor) {
