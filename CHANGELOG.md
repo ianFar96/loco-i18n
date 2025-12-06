@@ -6,6 +6,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+### 1.3.0
+
 - Added support for objects as valid translations.
 
     Example:
