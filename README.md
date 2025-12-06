@@ -57,16 +57,4 @@ This extension contributes the following settings:
 
 ## Release Notes
 
-### 1.0.0
-
-- Initial release with AST-based key scanning, missing key diagnostics, and Loco integration.
-
-### 1.1.0
-
-- Added Quick Fix option on missing keys  
-- Added Create Key command which creates the untranslated asset in Loco
-
-### 1.2.0
-
-- Changed approach from key-based to translation-based scanning  
-- Added inlay hints and hover tooltips for existing translations
+[CHANGELOG](./CHANGELOG.md)

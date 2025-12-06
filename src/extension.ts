@@ -4,12 +4,20 @@ import * as vscode from 'vscode';
 import EditorManager from './textEditor';
 import LocoManager from './loco';
 
+// TODO: ask the user if they want to enable the extension in this project and store the preference
+// this avoids bothering them if they open a non-internationalized project
+
+// TODO: add autocomplete for translation keys when typing inside tFunctionName calls
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	const config = vscode.workspace.getConfiguration('locoI18n');
 	const locoManager = new LocoManager(config);
 	const editorManager = new EditorManager(locoManager, config);
+
+	// Refresh translations on activation
+	await locoManager.refreshTranslations();
 	
 	const editor = vscode.window.activeTextEditor;
 	if (editor) { editorManager.scanDocument(editor); }

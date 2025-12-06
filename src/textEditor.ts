@@ -78,13 +78,11 @@ export default class EditorManager {
                         const text = document.getText(range);
                         const hints: vscode.InlayHint[] = [];
     
-                        const regex = new RegExp(`${escapeRegex(tFunctionName)}\\s*\\(\\s*['"\`](.+?)['"\`]\\s*\\)`, 'g');
+                        const regex = new RegExp(`${escapeRegex(tFunctionName)}\\s*\\(\\s*['"\`](.+?)['"\`]`, 'g');
                         let match;
     
                         // Offset where the given range starts inside the full document
                         const rangeStartOffset = document.offsetAt(range.start);
-    
-                        const locoTranslations = await locoManager.getTranslations();
     
                         while ((match = regex.exec(text)) !== null) {
                             const key = match[1];
@@ -93,16 +91,18 @@ export default class EditorManager {
                             const absoluteOffset = rangeStartOffset + endOfMatchInRange;
                             const position = document.positionAt(absoluteOffset);
     
-                            const translation = locoTranslations?.[key];
+                            const translation = await locoManager.getNestedTranslation(key);
                             if (!translation) {continue;}
     
+                            const serializedTranslation = locoManager.serializeTranslation(translation);
+                            
                             const hint = new vscode.InlayHint(
                                 position,
-                                ` ${translation}`,  // leading space for readability
+                                ` ${serializedTranslation}`,  // leading space for readability
                                 vscode.InlayHintKind.Type
                             );
     
-                            hint.tooltip = translation;
+                            hint.tooltip = serializedTranslation;
     
                             hints.push(hint);
                         }
@@ -123,13 +123,12 @@ export default class EditorManager {
                     const key = raw.slice(1, -1); // remove quotes
 
                     // Example: Look up the translation value from your cached keys
-                    const locoTranslations = await locoManager.getTranslations();
-                    const value = locoTranslations?.[key];
+                    const value = await locoManager.getNestedTranslation(key);
 
                     if (!value) {return;}
 
                     return new vscode.Hover(
-                        new vscode.MarkdownString(`**${key}**\n\n${value}`)
+                        new vscode.MarkdownString(`**${key}**\n\n${locoManager.serializeTranslation(value)}`)
                     );
                 }
             });
@@ -145,56 +144,28 @@ export default class EditorManager {
         const text = editor.document.getText();
         
         try {
-            const ast = parse(text, {
-                sourceType: 'module',
-                plugins: [
-                    'typescript',
-                    'jsx',
-                    'decorators-legacy',
-                    'classProperties'
-                ]
-            });
-    
-            const keys: t.StringLiteral[] = [];
-    
-            const tFunctionName = this.config.tFunctionName;
-            traverse(ast, {
-                CallExpression(path) {
-                    const node = path.node;
-                    if (t.isIdentifier(node.callee, { name: tFunctionName })) {
-                        const arg = node.arguments[0];
-    
-                        if (t.isStringLiteral(arg)) {
-                            keys.push(arg);
-                        }
-                    }
-                }
-            });
+            const keys= this.getKeysFromEditor(text);
 
-            const locoTranslations = await this.locoManager.getTranslations();
             const diagnostics: vscode.Diagnostic[] = [];
             
-            // When error getting loco keys just empty the diagnostics
-            if (locoTranslations !== null) {
-                for (const node of keys) {
-                    if (!(node.value in locoTranslations)) {
-                        const start = editor.document.positionAt(node.start!);
-                        const end = editor.document.positionAt(node.end!);
-    
-                        const range = new vscode.Range(start, end);
-                        const message = `Missing translation key: "${node.value}"`;
-    
-                        const diagnostic = new vscode.Diagnostic(
-                            range,
-                            message,
-                            vscode.DiagnosticSeverity.Warning
-                        );
-    
-                        diagnostics.push({
-                            ...diagnostic,
-                            source: 'loco-i18n'
-                        });
-                    }
+            for (const node of keys) {
+                if (!await this.locoManager.getNestedTranslation(node.value)) {
+                    const start = editor.document.positionAt(node.start!);
+                    const end = editor.document.positionAt(node.end!);
+
+                    const range = new vscode.Range(start, end);
+                    const message = `Missing translation key: "${node.value}"`;
+
+                    const diagnostic = new vscode.Diagnostic(
+                        range,
+                        message,
+                        vscode.DiagnosticSeverity.Warning
+                    );
+
+                    diagnostics.push({
+                        ...diagnostic,
+                        source: 'loco-i18n'
+                    });
                 }
             }
 
@@ -203,7 +174,36 @@ export default class EditorManager {
             console.debug('Document Analyzed');
         } catch (err) {
             console.error(`Failed to parse file: ${err}`);
-            vscode.window.showErrorMessage("Failed to parse file");
         }
+    }
+
+    private getKeysFromEditor(text: string) {
+        const ast = parse(text, {
+            sourceType: 'module',
+            plugins: [
+                'typescript',
+                'jsx',
+                'decorators-legacy',
+                'classProperties'
+            ]
+        });
+
+        const keys: t.StringLiteral[] = [];
+
+        const tFunctionName = this.config.tFunctionName;
+        traverse(ast, {
+            CallExpression(path) {
+                const node = path.node;
+                if (t.isIdentifier(node.callee, { name: tFunctionName })) {
+                    const arg = node.arguments[0];
+
+                    if (t.isStringLiteral(arg)) {
+                        keys.push(arg);
+                    }
+                }
+            }
+        });
+
+        return keys;
     }
 }
